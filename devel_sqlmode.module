@@ -1,0 +1,83 @@
+<?php
+
+/**
+ * @file
+ * Switch the SQL mode of MySQL.
+ */
+
+/**
+ * Implementation of hook_menu().
+ */
+function devel_sqlmode_menu() {
+  $items['admin/settings/devel_sqlmode'] = array(
+    'title' => 'SQL mode switcher',
+    'description' => 'Change the SQL mode of MySQL.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('devel_sqlmode_admin_settings'),
+    'access arguments' => array('administer site configuration')
+  );
+  return $items;
+}
+
+function devel_sqlmode_admin_settings() {
+  $form = array();
+  // http://dev.mysql.com/doc/refman/5.0/en/server-sql-mode.html
+  $sql_modes = drupal_map_assoc(
+    array(
+      'ANSI',
+      'STRICT_TRANS_TABLES',
+      'TRADITIONAL',
+      'ALLOW_INVALID_DATES',
+      'ANSI_QUOTES',
+      'ERROR_FOR_DIVISION_BY_ZERO',
+      'HIGH_NOT_PRECEDENCE',
+      'IGNORE_SPACE',
+      'NO_AUTO_CREATE_USER',
+      'NO_AUTO_VALUE_ON_ZERO',
+      'NO_BACKSLASH_ESCAPES ',
+      'NO_DIR_IN_CREATE',
+      'NO_ENGINE_SUBSTITUTION',
+      'NO_FIELD_OPTIONS',
+      'NO_KEY_OPTIONS',
+      'NO_TABLE_OPTIONS',
+      'NO_UNSIGNED_SUBTRACTION',
+      'NO_ZERO_DATE',
+      'NO_ZERO_IN_DATE',
+      'ONLY_FULL_GROUP_BY',
+      'PIPES_AS_CONCAT',
+      'REAL_AS_FLOAT',
+      'STRICT_ALL_TABLES',
+      'DB2',
+      'MAXDB',
+      'MSSQL',
+      'MYSQL323',
+      'MYSQL40',
+      'ORACLE',
+      'POSTGRESQL'
+    )
+  );
+  asort($sql_modes, SORT_STRING);
+  $form['devel_sqlmode'] = array(
+    '#type' => 'checkboxes',
+    '#title' => t('SQL modes to enable'),
+    '#options' => $sql_modes,
+    '#default_value' => variable_get('devel_sqlmode', array())
+  );
+  $form['submit'] = array('#type' => 'submit', '#value' => t('Save configuration'));
+  return $form;
+}
+
+function devel_sqlmode_admin_settings_submit($form_id, $form_state) {
+  $sql_modes = array();
+  while (list($key, $value) = each($form_state['values']['devel_sqlmode'])) {
+    if (!strcmp($key, $value)) {
+      $sql_modes[] = $value;
+    }
+  }
+  variable_set('devel_sqlmode', $sql_modes);
+}
+
+function devel_sqlmode_boot() {
+  $sql_modes = implode(',', variable_get('devel_sqlmode', array()));
+  db_query("SET SESSION sql_mode='%s'", array($sql_modes));
+}
