@@ -1,4 +1,5 @@
 name = SQL Mode Switcher
 description = SQL mode changer for MySQL.
 package = Development
-core = 6.x
+core = 7.x
+configure = admin/config/development/devel_sqlmode
