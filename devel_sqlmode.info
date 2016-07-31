@@ -1,5 +1,6 @@
-name = SQL Mode Switcher
+name = SQL mode switcher
 description = SQL mode changer for MySQL.
 package = Development
-core = 7.x
+backdrop = 1.x
 configure = admin/config/development/devel_sqlmode
+dependencies[] = bad_judgement

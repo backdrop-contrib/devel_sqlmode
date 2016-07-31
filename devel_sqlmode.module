@@ -11,8 +11,8 @@
 function devel_sqlmode_menu() {
   $items['admin/config/development/devel_sqlmode'] = array(
     'title' => 'SQL mode switcher',
-    'description' => 'Change the SQL mode of MySQL. Modes define what SQL syntax MySQL should support and what kind of data validation checks it should perform. This makes it easier to prototype compatability with other database platforms like PostgreSQL, MSSQL, or Oracle.',
-    'page callback' => 'drupal_get_form',
+    'description' => 'Change the SQL mode of MySQL. Modes define what SQL syntax MySQL should support and what kind of data validation checks it should perform. This makes it easier to prototype compatibility with other database platforms like PostgreSQL, MSSQL, or Oracle.',
+    'page callback' => 'backdrop_get_form',
     'page arguments' => array('devel_sqlmode_admin_settings'),
     'access arguments' => array('administer site configuration')
   );
@@ -22,7 +22,7 @@ function devel_sqlmode_menu() {
 function devel_sqlmode_admin_settings() {
   $form = array();
   // http://dev.mysql.com/doc/refman/5.5/en/server-sql-mode.html
-  $sql_modes = drupal_map_assoc(
+  $sql_modes = backdrop_map_assoc(
     array(
       'ANSI',
       'STRICT_TRANS_TABLES',
@@ -62,11 +62,11 @@ function devel_sqlmode_admin_settings() {
     '#type' => 'checkboxes',
     '#title' => t('SQL modes to enable'),
     '#options' => $sql_modes,
-    '#default_value' => variable_get('devel_sqlmode', array()),
+    '#default_value' => config_get('devel_sqlmode.settings', 'devel_sqlmode'),
     '#description' => t('Listed modes are supported by !link.', array('!link' => l('MySQL 5.5', 'http://dev.mysql.com/doc/refman/5.5/en/server-sql-mode.html'))),
   );
-  $form['submit'] = array('#type' => 'submit', '#value' => t('Save configuration'));
   $form['#submit'][] = 'devel_sqlmode_admin_settings_submit';
+  $form['submit'] = array('#type' => 'submit', '#value' => t('Save configuration'));
   return $form;
 }
 
@@ -77,13 +77,17 @@ function devel_sqlmode_admin_settings_submit($form_id, $form_state) {
       $sql_modes[] = $value;
     }
   }
-  variable_set('devel_sqlmode', $sql_modes);
+  config('devel_sqlmode.settings')
+    ->set('devel_sqlmode', $sql_modes)
+    ->save();
 }
 
 /**
  * Implements hook_boot().
  */
 function devel_sqlmode_boot() {
-  $sql_modes = implode(',', variable_get('devel_sqlmode', array()));
-  db_query("SET SESSION sql_mode = :sql_modes", array(':sql_modes' => $sql_modes));
+  $sql_modes = implode(',', config_get('devel_sqlmode.settings', 'devel_sqlmode'));
+  if (!empty($sql_modes)) {
+    db_query("SET SESSION sql_mode = :sql_modes", array(':sql_modes' => $sql_modes));
+  }
 }
