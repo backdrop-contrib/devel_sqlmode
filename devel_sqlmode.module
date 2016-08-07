@@ -6,6 +6,18 @@
  */
 
 /**
+ * Implements hook_config_info();
+ */
+function devel_sqlmode_config_info() {
+  $prefixes = array();
+  $prefixes['devel_sqlmode.settings'] = array(
+    'group' => t('Configuration'),
+    'label' => t('SQL mode switcher settings'),
+  );
+  return $prefixes;
+}
+
+/**
  * Implements hook_menu().
  */
 function devel_sqlmode_menu() {
