@@ -46,7 +46,7 @@ Available SQL modes for configuration are as follows:
 Current Maintainer
 ------------------
 
-- David Norman (https://github.com/deekayen)
+- None
 
 Credits
 -------
